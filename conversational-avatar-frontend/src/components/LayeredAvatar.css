@@ -1,0 +1,95 @@
+/* =======================================================
+   LAYERED AVATAR — ORA-style composited sprite system
+   ======================================================= */
+
+.avatar-stage {
+  position: relative;
+  display: inline-flex;
+  align-items: flex-end;
+  justify-content: center;
+  height: 72vh;
+  width: auto;
+  user-select: none;
+  pointer-events: none;
+  /* Idle breathing */
+  animation: avatar-breathe 5s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+
+/* Talking: shorter, quicker bob */
+.avatar-stage.talking {
+  animation: avatar-talk 0.55s ease-in-out infinite;
+}
+
+@keyframes avatar-breathe {
+  0%,  100% { transform: translateY(0px); }
+  50%        { transform: translateY(-10px); }
+}
+@keyframes avatar-talk {
+  0%,  100% { transform: translateY(0px); }
+  50%        { transform: translateY(-5px); }
+}
+
+/* ── Every child layer sits on same origin ── */
+.avatar-layer {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 100%;
+  width: auto;
+  object-fit: contain;
+  object-position: bottom center;
+  /* Layer cross-fade */
+  transition: opacity 0.08s linear;
+}
+
+/* Body is the tallest, sets natural size */
+.avatar-layer--body {
+  position: relative;
+  transform: none;
+  left: auto;
+  bottom: auto;
+  display: block;
+  height: 100%;
+  width: auto;
+}
+
+/* Hand gesture layers — same size as body, swap visibility */
+.avatar-layer--hand {
+  opacity: 0;
+  transition: opacity 0.18s ease;
+}
+.avatar-layer--hand.active {
+  opacity: 1;
+}
+
+/* Canvas face overlay: absolutely positioned over the face area */
+.avatar-face-canvas {
+  position: absolute;
+  pointer-events: none;
+  /* Positioned relative to stage via JS */
+}
+
+/* ── Gesture sub-animations ── */
+
+/* Wave: the active hand layer rocks back and forth */
+.avatar-stage.gesture-wave .avatar-layer--hand-wave.active {
+  animation: hand-wave-anim 0.6s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+@keyframes hand-wave-anim {
+  0%   { transform: translateX(-50%) rotate(0deg);   }
+  25%  { transform: translateX(-50%) rotate(6deg);   }
+  75%  { transform: translateX(-50%) rotate(-6deg);  }
+  100% { transform: translateX(-50%) rotate(0deg);   }
+}
+
+/* Point: slight lean forward */
+.avatar-stage.gesture-point .avatar-layer--hand-point.active {
+  animation: hand-point-anim 1.8s ease-in-out infinite;
+}
+@keyframes hand-point-anim {
+  0%,100% { transform: translateX(-50%) translateX(0px);  }
+  50%     { transform: translateX(-50%) translateX(4px);  }
+}

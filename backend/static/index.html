@@ -1,0 +1,1553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Conversational AI Avatar — Voice & Speech Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0a0d14;
+      --bg-secondary: #121826;
+      --bg-card: rgba(22, 30, 49, 0.7);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --accent-cyan: #00f0ff;
+      --accent-purple: #9d4edd;
+      --accent-pink: #f72585;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --glow-cyan: 0 0 24px rgba(0, 240, 255, 0.35);
+      --glow-purple: 0 0 24px rgba(157, 78, 221, 0.35);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Outfit', -apple-system, sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      min-height: 100vh;
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(ellipse at 20% 0%, rgba(157, 78, 221, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 10%, rgba(0, 240, 255, 0.12) 0%, transparent 50%),
+        radial-gradient(circle at 50% 90%, rgba(247, 37, 133, 0.1) 0%, transparent 60%);
+    }
+
+    header {
+      padding: 20px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-color);
+      background: rgba(10, 13, 20, 0.85);
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: var(--glow-cyan);
+    }
+
+    .brand-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(90deg, #fff, #cbd5e1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-tag {
+      font-size: 0.75rem;
+      padding: 3px 8px;
+      border-radius: 20px;
+      background: rgba(0, 240, 255, 0.12);
+      color: var(--accent-cyan);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      font-weight: 500;
+    }
+
+    .status-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: var(--success);
+      font-size: 0.82rem;
+      font-weight: 500;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 10px var(--success);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.9); }
+    }
+
+    main {
+      max-width: 1300px;
+      margin: 0 auto;
+      padding: 28px 24px;
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 28px;
+    }
+
+    @media (max-width: 960px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .glass-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 24px;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .glass-card:hover {
+      border-color: rgba(255, 255, 255, 0.12);
+    }
+
+    .section-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .section-title .badge {
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      background: rgba(157, 78, 221, 0.2);
+      border: 1px solid rgba(157, 78, 221, 0.4);
+      color: #d8b4fe;
+      border-radius: 12px;
+    }
+
+    /* Avatar Viseme Visualizer */
+    .avatar-stage {
+      height: 250px;
+      background: radial-gradient(circle at center, #1b253b 0%, #0c111c 80%);
+      border-radius: 16px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      margin-bottom: 16px;
+    }
+
+    .avatar-glow {
+      position: absolute;
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0, 240, 255, 0.15) 0%, transparent 70%);
+      filter: blur(20px);
+      transition: transform 0.1s ease-out;
+    }
+
+    .avatar-head {
+      position: relative;
+      z-index: 2;
+      width: 140px;
+      height: 165px;
+      border-radius: 70px 70px 60px 60px;
+      background: linear-gradient(145deg, #1e293b, #0f172a);
+      border: 2px solid rgba(0, 240, 255, 0.4);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 2px 10px rgba(255, 255, 255, 0.1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 42px;
+      transition: transform 0.08s ease;
+    }
+
+    .avatar-eyes {
+      display: flex;
+      gap: 32px;
+      margin-bottom: 26px;
+    }
+
+    .avatar-eye {
+      width: 16px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--accent-cyan);
+      box-shadow: 0 0 12px var(--accent-cyan);
+      position: relative;
+      animation: blink 4s infinite;
+    }
+
+    @keyframes blink {
+      0%, 96%, 100% { transform: scaleY(1); }
+      98% { transform: scaleY(0.1); }
+    }
+
+    .avatar-mouth-container {
+      width: 60px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .avatar-mouth {
+      width: 32px;
+      height: 6px;
+      background: #f43f5e;
+      border-radius: 12px;
+      transition: all 0.08s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow: 0 0 14px rgba(244, 63, 94, 0.6);
+    }
+
+    .viseme-indicator {
+      position: absolute;
+      bottom: 12px;
+      font-size: 0.8rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--accent-cyan);
+      background: rgba(0, 0, 0, 0.65);
+      padding: 4px 12px;
+      border-radius: 20px;
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      letter-spacing: 1px;
+    }
+
+    /* Microphone Input Selector & Monitor Controls */
+    .mic-config-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .mic-select-wrap {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(10, 15, 28, 0.75);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 6px 12px;
+    }
+
+    .mic-icon-badge {
+      font-size: 1rem;
+    }
+
+    .mic-device-select {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text-main);
+      font-size: 0.82rem;
+      font-family: inherit;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .mic-device-select option {
+      background: #0f172a;
+      color: #e2e8f0;
+    }
+
+    .btn-sm {
+      padding: 7px 14px;
+      font-size: 0.82rem;
+      border-radius: 10px;
+      white-space: nowrap;
+    }
+
+    /* Enhanced Mic VU Level meter */
+    .mic-level-container {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 12px;
+      background: rgba(10, 15, 28, 0.65);
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+    }
+
+    .mic-level-header, .mic-level-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+    }
+
+    .mic-level-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .mic-level-label strong {
+      color: var(--accent-cyan);
+      font-family: 'JetBrains Mono', monospace;
+      margin-left: 4px;
+    }
+
+    .mic-status-badge {
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-muted);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .mic-status-badge.active {
+      background: rgba(16, 185, 129, 0.2);
+      color: #34d399;
+      border-color: rgba(16, 185, 129, 0.4);
+    }
+
+    .mic-status-badge.recording {
+      background: rgba(239, 68, 68, 0.25);
+      color: #f87171;
+      border-color: rgba(239, 68, 68, 0.5);
+      animation: recordPulsing 1.4s infinite;
+    }
+
+    .mic-status-badge.warning {
+      background: rgba(245, 158, 11, 0.25);
+      color: #fbbf24;
+      border-color: rgba(245, 158, 11, 0.5);
+    }
+
+    .mic-level-bar-bg {
+      width: 100%;
+      height: 9px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 5px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .mic-level-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #10b981 0%, #00f0ff 70%, #ef4444 100%);
+      border-radius: 5px;
+      transition: width 0.04s ease-out;
+    }
+
+    .mic-device-name {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      max-width: 75%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .recording-timer {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      color: var(--accent-pink);
+      font-weight: 600;
+    }
+
+    .alert-box {
+      font-size: 0.8rem;
+      padding: 10px 14px;
+      border-radius: 8px;
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #fca5a5;
+      line-height: 1.4;
+      margin-bottom: 12px;
+    }
+
+    /* Waveform canvas */
+    .waveform-box {
+      width: 100%;
+      height: 44px;
+      background: rgba(10, 15, 28, 0.7);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* Controls */
+    .controls-grid {
+      display: grid;
+      grid-template-columns: 1.8fr 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    @media (max-width: 600px) {
+      .controls-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .btn {
+      padding: 12px 18px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 0.92rem;
+      font-family: inherit;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border: 1px solid transparent;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Main Record Action Button */
+    .btn-record-toggle {
+      background: linear-gradient(135deg, #ef4444, #be123c);
+      color: #fff;
+      box-shadow: 0 4px 18px rgba(239, 68, 68, 0.4);
+    }
+
+    .btn-record-toggle:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px rgba(239, 68, 68, 0.6);
+    }
+
+    .btn-record-toggle.is-recording {
+      background: linear-gradient(135deg, #10b981, #047857);
+      box-shadow: 0 0 24px rgba(16, 185, 129, 0.6);
+      animation: recordPulsing 1.4s infinite;
+    }
+
+    @keyframes recordPulsing {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+      50% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-cyan), #0284c7);
+      color: #031525;
+      font-weight: 700;
+      box-shadow: var(--glow-cyan);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 0 28px rgba(0, 240, 255, 0.6);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .tip-box {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      padding: 8px 12px;
+      background: rgba(0, 240, 255, 0.05);
+      border-radius: 8px;
+      border-left: 3px solid var(--accent-cyan);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Conversation History */
+    .chat-box {
+      height: 300px;
+      overflow-y: auto;
+      padding-right: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .chat-box::-webkit-scrollbar {
+      width: 5px;
+    }
+    .chat-box::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 4px;
+    }
+
+    .message-row {
+      display: flex;
+      flex-direction: column;
+      max-width: 85%;
+      gap: 4px;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .message-row.user {
+      align-self: flex-end;
+    }
+
+    .message-row.assistant {
+      align-self: flex-start;
+    }
+
+    .message-bubble {
+      padding: 12px 16px;
+      border-radius: 16px;
+      font-size: 0.92rem;
+      line-height: 1.45;
+    }
+
+    .message-row.user .message-bubble {
+      background: linear-gradient(135deg, #0284c7, #2563eb);
+      color: #fff;
+      border-bottom-right-radius: 4px;
+    }
+
+    .message-row.assistant .message-bubble {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-main);
+      border-bottom-left-radius: 4px;
+    }
+
+    .message-meta {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Text input bar */
+    .input-bar {
+      display: flex;
+      gap: 10px;
+    }
+
+    .text-input {
+      flex: 1;
+      padding: 12px 16px;
+      border-radius: 12px;
+      background: rgba(10, 15, 28, 0.7);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      font-size: 0.95rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .text-input:focus {
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 16px rgba(0, 240, 255, 0.2);
+    }
+
+    /* Settings sidebar */
+    .sidebar-section {
+      margin-bottom: 24px;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+
+    .form-select {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 10px;
+      background: #0f1624;
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      font-size: 0.88rem;
+      font-family: inherit;
+      outline: none;
+    }
+
+    /* Metrics table */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .metric-badge {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 10px;
+      padding: 10px;
+      text-align: center;
+    }
+
+    .metric-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: var(--accent-cyan);
+    }
+
+    .metric-label {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .audio-player-box {
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    audio {
+      width: 100%;
+      height: 36px;
+      border-radius: 18px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <div class="brand-icon">🎙️</div>
+      <div>
+        <div class="brand-title">AI Avatar Voice Studio</div>
+      </div>
+      <span class="brand-tag">Real-Time Voice Pipeline</span>
+    </div>
+    <div class="status-pill">
+      <div class="status-dot"></div>
+      <span id="connection-status">Live STT / TTS Ready</span>
+    </div>
+  </header>
+
+  <main>
+    <!-- Left Column: Voice Conversation Stage -->
+    <div>
+      <div class="glass-card">
+        <div class="section-title">
+          <span>Avatar Live Embodiment</span>
+          <span class="badge">Real-Time Visemes</span>
+        </div>
+
+        <div class="avatar-stage">
+          <div class="avatar-glow" id="avatar-glow"></div>
+          <div class="avatar-head" id="avatar-head">
+            <div class="avatar-eyes">
+              <div class="avatar-eye"></div>
+              <div class="avatar-eye"></div>
+            </div>
+            <div class="avatar-mouth-container">
+              <div class="avatar-mouth" id="avatar-mouth"></div>
+            </div>
+          </div>
+          <div class="viseme-indicator" id="viseme-indicator">REST</div>
+        </div>
+
+        <!-- Microphone Input Source Selector -->
+        <div class="mic-config-row">
+          <div class="mic-select-wrap">
+            <span class="mic-icon-badge">🎙️</span>
+            <select id="mic-select" class="mic-device-select" title="Select your input microphone">
+              <option value="">Default Microphone</option>
+            </select>
+          </div>
+          <button class="btn btn-sm btn-secondary" id="btn-test-mic" type="button" title="Test & monitor microphone live">
+            <span id="test-mic-icon">🔊</span>
+            <span id="test-mic-label">Test Mic</span>
+          </button>
+        </div>
+
+        <!-- Mic VU Level meter -->
+        <div class="mic-level-container">
+          <div class="mic-level-header">
+            <span class="mic-level-label">Mic Input Level: <strong id="mic-level-pct">0%</strong></span>
+            <span class="mic-status-badge" id="mic-status-badge">Standby</span>
+          </div>
+          <div class="mic-level-bar-bg">
+            <div class="mic-level-bar-fill" id="mic-level-fill"></div>
+          </div>
+          <div class="mic-level-footer">
+            <span class="mic-device-name" id="mic-device-name">Ready • Click "Test Mic" or "Start Recording"</span>
+            <span class="recording-timer" id="recording-timer">00:00</span>
+          </div>
+        </div>
+
+        <div id="mic-silent-warning" class="alert-box" style="display:none;">
+          ⚠️ <strong>0% volume detected from this microphone:</strong> The browser is receiving silence. If you have headphones, a headset, or a built-in mic, please select it from the <strong>Microphone</strong> dropdown above!
+        </div>
+
+        <!-- Waveform Visualization -->
+        <div class="waveform-box">
+          <canvas id="waveform-canvas"></canvas>
+        </div>
+
+        <div class="tip-box">
+          💡 <strong>Tip:</strong> Click <b>"Start Recording"</b>, speak a question clearly into your microphone, then click <b>"Stop & Send"</b>. (Or hold Spacebar to talk).
+        </div>
+
+        <!-- Voice Conversation Controls -->
+        <div class="controls-grid">
+          <button class="btn btn-record-toggle" id="btn-record-toggle">
+            <span id="record-icon">🎙️</span>
+            <span id="record-text">Start Recording</span>
+          </button>
+          <button class="btn btn-secondary" id="btn-sample-test">
+            <span>🎵 Send Sample Audio</span>
+          </button>
+          <button class="btn btn-secondary" id="btn-replay" disabled>
+            <span>🔊 Replay Audio</span>
+          </button>
+          <button class="btn btn-secondary" id="btn-new-session">
+            <span>🔄 New Session</span>
+          </button>
+        </div>
+
+
+        <!-- Conversation History -->
+        <div class="chat-box" id="chat-box">
+          <div class="message-row assistant">
+            <div class="message-bubble">
+              Hello! I am your real-time conversational AI avatar. Click "Start Recording" above and talk to me, or type below!
+            </div>
+            <span class="message-meta">Avatar • Ready</span>
+          </div>
+        </div>
+
+        <!-- Text Turn Bar -->
+        <div class="input-bar">
+          <input type="text" class="text-input" id="message-input" placeholder="Type a message or use voice above..." autocomplete="off">
+          <button class="btn btn-primary" id="btn-send">Send</button>
+        </div>
+
+        <div class="audio-player-box" id="audio-container" style="display:none;">
+          <audio id="tts-audio" controls></audio>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Settings & Live Pipeline Telemetry -->
+    <div>
+      <!-- Session & Persona Settings -->
+      <div class="glass-card sidebar-section">
+        <div class="section-title">
+          <span>Pipeline Configuration</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Active Session ID</label>
+          <input type="text" class="form-select" id="session-id-display" readonly style="font-family:'JetBrains Mono', monospace; font-size:0.75rem;">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Avatar Voice Persona</label>
+          <select class="form-select" id="voice-select">
+            <option value="en-US-JennyNeural" selected>Jenny (US Female - Natural)</option>
+            <option value="en-US-GuyNeural">Guy (US Male - Natural)</option>
+            <option value="en-US-AriaNeural">Aria (US Female - Expressive)</option>
+            <option value="en-IN-NeerjaNeural">Neerja (Indian English Female)</option>
+            <option value="en-IN-PrabhatNeural">Prabhat (Indian English Male)</option>
+            <option value="en-GB-SoniaNeural">Sonia (UK Female)</option>
+            <option value="en-GB-RyanNeural">Ryan (UK Male)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Speech-To-Text Engine</label>
+          <div style="font-size:0.85rem; color:var(--text-muted); font-family:'JetBrains Mono',monospace;">faster-whisper (local int8)</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Text-To-Speech Engine</label>
+          <div style="font-size:0.85rem; color:var(--text-muted); font-family:'JetBrains Mono',monospace;">edge-tts (neural) + pyttsx3</div>
+        </div>
+      </div>
+
+      <!-- Turn Latency Telemetry (MySQL SystemMetrics) -->
+      <div class="glass-card">
+        <div class="section-title">
+          <span>Turn Latency Telemetry</span>
+          <span class="badge">MySQL Metrics</span>
+        </div>
+
+        <div class="metrics-grid">
+          <div class="metric-badge">
+            <div class="metric-value" id="stt-latency">-</div>
+            <div class="metric-label">STT Latency</div>
+          </div>
+          <div class="metric-badge">
+            <div class="metric-value" id="llm-latency">-</div>
+            <div class="metric-label">LLM Latency</div>
+          </div>
+          <div class="metric-badge">
+            <div class="metric-value" id="tts-latency">-</div>
+            <div class="metric-label">TTS Latency</div>
+          </div>
+          <div class="metric-badge">
+            <div class="metric-value" id="total-latency" style="color:var(--accent-pink);">-</div>
+            <div class="metric-label">Total Turn</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // State
+    let currentSessionId = "";
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let isRecording = false;
+    let recordingStartTime = 0;
+    let timerInterval = null;
+    let audioContext = null;
+    let analyser = null;
+    let micStream = null;
+    let animFrameId = null;
+
+    // Elements
+    const btnRecordToggle = document.getElementById("btn-record-toggle");
+    const recordIcon = document.getElementById("record-icon");
+    const recordText = document.getElementById("record-text");
+    const recordingTimer = document.getElementById("recording-timer");
+    const micLevelFill = document.getElementById("mic-level-fill");
+    const micSelect = document.getElementById("mic-select");
+    const btnTestMic = document.getElementById("btn-test-mic");
+    const testMicIcon = document.getElementById("test-mic-icon");
+    const testMicLabel = document.getElementById("test-mic-label");
+    const micLevelPct = document.getElementById("mic-level-pct");
+    const micStatusBadge = document.getElementById("mic-status-badge");
+    const micDeviceName = document.getElementById("mic-device-name");
+    const micSilentWarning = document.getElementById("mic-silent-warning");
+    const btnSend = document.getElementById("btn-send");
+    const messageInput = document.getElementById("message-input");
+    const chatBox = document.getElementById("chat-box");
+    const ttsAudio = document.getElementById("tts-audio");
+    const audioContainer = document.getElementById("audio-container");
+    const btnReplay = document.getElementById("btn-replay");
+    const btnNewSession = document.getElementById("btn-new-session");
+    const sessionIdDisplay = document.getElementById("session-id-display");
+    const voiceSelect = document.getElementById("voice-select");
+    const avatarMouth = document.getElementById("avatar-mouth");
+    const avatarHead = document.getElementById("avatar-head");
+    const avatarGlow = document.getElementById("avatar-glow");
+    const visemeIndicator = document.getElementById("viseme-indicator");
+    const canvas = document.getElementById("waveform-canvas");
+    const canvasCtx = canvas.getContext("2d");
+
+    // Latency elements
+    const sttLatencyEl = document.getElementById("stt-latency");
+    const llmLatencyEl = document.getElementById("llm-latency");
+    const ttsLatencyEl = document.getElementById("tts-latency");
+    const totalLatencyEl = document.getElementById("total-latency");
+
+    // Viseme blendshape visual mappings
+    const VISEME_MOUTH_STYLES = {
+      "viseme_sil": { width: "32px", height: "6px", borderRadius: "12px", open: 0 },
+      "viseme_aa": { width: "40px", height: "26px", borderRadius: "16px", open: 1.0 },
+      "viseme_E": { width: "42px", height: "18px", borderRadius: "10px", open: 0.7 },
+      "viseme_I": { width: "44px", height: "12px", borderRadius: "8px", open: 0.5 },
+      "viseme_O": { width: "26px", height: "24px", borderRadius: "20px", open: 0.9 },
+      "viseme_U": { width: "20px", height: "18px", borderRadius: "20px", open: 0.6 },
+      "viseme_PP": { width: "34px", height: "3px", borderRadius: "4px", open: 0.1 },
+      "viseme_FF": { width: "36px", height: "8px", borderRadius: "6px", open: 0.3 },
+      "viseme_TH": { width: "36px", height: "10px", borderRadius: "8px", open: 0.4 },
+      "viseme_DD": { width: "38px", height: "12px", borderRadius: "10px", open: 0.4 },
+      "viseme_kk": { width: "38px", height: "16px", borderRadius: "12px", open: 0.6 },
+      "viseme_CH": { width: "34px", height: "16px", borderRadius: "14px", open: 0.6 },
+      "viseme_SS": { width: "40px", height: "8px", borderRadius: "6px", open: 0.3 },
+      "viseme_nn": { width: "38px", height: "12px", borderRadius: "8px", open: 0.4 },
+      "viseme_RR": { width: "28px", height: "16px", borderRadius: "12px", open: 0.6 },
+      "REST": { width: "32px", height: "6px", borderRadius: "12px", open: 0 }
+    };
+
+    function applyViseme(shape) {
+      visemeIndicator.textContent = shape.toUpperCase();
+      const style = VISEME_MOUTH_STYLES[shape] || VISEME_MOUTH_STYLES["REST"];
+      avatarMouth.style.width = style.width;
+      avatarMouth.style.height = style.height;
+      avatarMouth.style.borderRadius = style.borderRadius;
+
+      const scale = 1 + (style.open * 0.08);
+      avatarGlow.style.transform = `scale(${scale})`;
+      avatarHead.style.transform = `scale(${1 + style.open * 0.02})`;
+    }
+
+    function playVisemesTimeline(visemes) {
+      if (!visemes || visemes.length === 0) return;
+
+      function update() {
+        if (ttsAudio.paused || ttsAudio.ended) {
+          applyViseme("REST");
+          return;
+        }
+
+        const currentMs = ttsAudio.currentTime * 1000;
+        let activeViseme = "REST";
+
+        for (let i = 0; i < visemes.length; i++) {
+          if (visemes[i].time_ms <= currentMs) {
+            activeViseme = visemes[i].shape || visemes[i].shape_legacy || "REST";
+          } else {
+            break;
+          }
+        }
+
+        applyViseme(activeViseme);
+        requestAnimationFrame(update);
+      }
+
+      requestAnimationFrame(update);
+    }
+
+    // Initialize or retrieve Session
+    async function initSession() {
+      try {
+        let userId = localStorage.getItem("avatar_user_id");
+        if (!userId) {
+          const userRes = await fetch("/users/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              name: "Demo User",
+              email: `user_${Date.now()}@example.com`,
+              password: "secretpassword"
+            })
+          });
+          const userData = await userRes.json();
+          userId = userData.user_id;
+          localStorage.setItem("avatar_user_id", userId);
+        }
+
+        const sessRes = await fetch("/sessions/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ user_id: userId, room_name: "voice-studio-room" })
+        });
+        const sessData = await sessRes.json();
+        currentSessionId = sessData.session_id;
+        sessionIdDisplay.value = currentSessionId;
+      } catch (err) {
+        console.error("Session init error:", err);
+      }
+    }
+
+    // Chat logging
+    function appendMessage(role, text, meta = "") {
+      const row = document.createElement("div");
+      row.className = `message-row ${role}`;
+      row.innerHTML = `
+        <div class="message-bubble">${escapeHtml(text)}</div>
+        <span class="message-meta">${role === 'user' ? 'You' : 'Avatar'} • ${meta || 'Just now'}</span>
+      `;
+      chatBox.appendChild(row);
+      chatBox.scrollTop = chatBox.scrollHeight;
+      return row;
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Setup persistent microphone stream & live VU monitoring
+    let micSourceNode = null;
+    let monitorMuteGainNode = null;
+    let isMonitoring = false;
+    let selectedMicDeviceId = "";
+
+    async function populateMicrophoneList() {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) return;
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const audioInputs = devices.filter(d => d.kind === "audioinput");
+        if (!micSelect || audioInputs.length === 0) return;
+
+        const currentVal = micSelect.value;
+        micSelect.innerHTML = "";
+
+        audioInputs.forEach((dev, idx) => {
+          const opt = document.createElement("option");
+          opt.value = dev.deviceId;
+          opt.textContent = dev.label || `Microphone ${idx + 1}`;
+          micSelect.appendChild(opt);
+        });
+
+        // Restore selection if still present
+        if (currentVal && audioInputs.some(d => d.deviceId === currentVal)) {
+          micSelect.value = currentVal;
+        } else if (selectedMicDeviceId && audioInputs.some(d => d.deviceId === selectedMicDeviceId)) {
+          micSelect.value = selectedMicDeviceId;
+        }
+      } catch (err) {
+        console.warn("Could not list audio devices:", err);
+      }
+    }
+
+    async function getOrInitMicStream(preferredDeviceId = null) {
+      if (preferredDeviceId) {
+        selectedMicDeviceId = preferredDeviceId;
+      }
+
+      // If switching device or restarting, stop existing tracks
+      if (micStream && preferredDeviceId) {
+        try {
+          micStream.getTracks().forEach(t => t.stop());
+        } catch (e) {}
+        micStream = null;
+      }
+
+      if (micStream && micStream.active) {
+        micStream.getAudioTracks().forEach(t => { t.enabled = true; });
+        return micStream;
+      }
+
+      // Crucial: echoCancellation: false on Windows prevents Chrome's WebRTC AEC
+      // from silencing microphone input to pure 0.0 zeroes!
+      const audioConstraints = {
+        echoCancellation: false,
+        noiseSuppression: false,
+        autoGainControl: true,
+      };
+
+      if (selectedMicDeviceId) {
+        audioConstraints.deviceId = { exact: selectedMicDeviceId };
+      }
+
+      micStream = await navigator.mediaDevices.getUserMedia({ audio: audioConstraints });
+
+      const activeTrack = micStream.getAudioTracks()[0];
+      if (activeTrack) {
+        activeTrack.enabled = true;
+        const trackSettings = activeTrack.getSettings ? activeTrack.getSettings() : {};
+        if (trackSettings.deviceId) {
+          selectedMicDeviceId = trackSettings.deviceId;
+        }
+
+        const label = activeTrack.label || "Microphone (Active)";
+        micDeviceName.textContent = label;
+
+        if (activeTrack.muted) {
+          micStatusBadge.className = "mic-status-badge warning";
+          micStatusBadge.textContent = "⚠️ Muted";
+        } else {
+          micStatusBadge.className = "mic-status-badge active";
+          micStatusBadge.textContent = "● Active";
+        }
+
+        activeTrack.onmute = () => {
+          micStatusBadge.className = "mic-status-badge warning";
+          micStatusBadge.textContent = "⚠️ Muted";
+        };
+        activeTrack.onunmute = () => {
+          micStatusBadge.className = "mic-status-badge active";
+          micStatusBadge.textContent = isRecording ? "● Recording" : "● Active";
+        };
+      }
+
+      // Web Audio Context setup
+      if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioContext.state === "suspended") {
+        await audioContext.resume();
+      }
+
+      if (!analyser) {
+        analyser = audioContext.createAnalyser();
+        analyser.fftSize = 256;
+        analyser.smoothingTimeConstant = 0.2;
+      }
+
+      // Reconnect source node
+      if (micSourceNode) {
+        try { micSourceNode.disconnect(); } catch (e) {}
+      }
+
+      micSourceNode = audioContext.createMediaStreamSource(micStream);
+      window._activeMicSourceNode = micSourceNode;
+      micSourceNode.connect(analyser);
+
+      // Force Web Audio pull by connecting Analyser to a zero-gain destination node
+      if (!monitorMuteGainNode) {
+        monitorMuteGainNode = audioContext.createGain();
+        monitorMuteGainNode.gain.value = 0;
+        monitorMuteGainNode.connect(audioContext.destination);
+      }
+      try { analyser.connect(monitorMuteGainNode); } catch (e) {}
+
+      // Refresh device dropdown now that labels are accessible
+      await populateMicrophoneList();
+
+      // Start continuous live monitoring
+      startLiveMonitoring();
+
+      testMicIcon.textContent = "🟢";
+      testMicLabel.textContent = "Mic Live";
+
+      return micStream;
+    }
+
+    function startLiveMonitoring() {
+      if (!analyser) return;
+      isMonitoring = true;
+
+      if (canvas.clientWidth > 0 && canvas.clientHeight > 0) {
+        canvas.width = canvas.clientWidth;
+        canvas.height = canvas.clientHeight;
+      }
+
+      const timeData = new Uint8Array(analyser.fftSize);
+      const freqData = new Uint8Array(analyser.frequencyBinCount);
+      let zeroVolumeFrames = 0;
+
+      function draw() {
+        if (!isMonitoring) return;
+        animFrameId = requestAnimationFrame(draw);
+
+        analyser.getByteTimeDomainData(timeData);
+
+        let peakDev = 0;
+        let sumDev = 0;
+        for (let i = 0; i < timeData.length; i++) {
+          const dev = Math.abs(timeData[i] - 128);
+          if (dev > peakDev) peakDev = dev;
+          sumDev += dev;
+        }
+
+        // Track silent frames (60fps: 180 frames = ~3 seconds)
+        if (peakDev === 0) {
+          zeroVolumeFrames++;
+        } else {
+          zeroVolumeFrames = 0;
+        }
+
+        if (zeroVolumeFrames > 180) {
+          micSilentWarning.style.display = "block";
+        } else if (zeroVolumeFrames === 0) {
+          micSilentWarning.style.display = "none";
+        }
+
+        // Sensitive volume mapping:
+        // peakDev is 0..127. Normal speech peak is 10..45.
+        // Pow curve ensures speaking normally shows 40% - 90%
+        let volumePct = 0;
+        if (peakDev > 0) {
+          volumePct = Math.min(100, Math.round(Math.pow(peakDev / 50, 0.72) * 100));
+        }
+
+        micLevelFill.style.width = `${volumePct}%`;
+        micLevelPct.textContent = `${volumePct}%`;
+
+        // Draw frequency spectrum bars
+        analyser.getByteFrequencyData(freqData);
+        canvasCtx.fillStyle = 'rgba(10, 15, 28, 0.35)';
+        canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+
+        const barCount = 36;
+        const barWidth = canvas.width / barCount;
+
+        for (let i = 0; i < barCount; i++) {
+          const val = freqData[i] || 0;
+          const barHeight = Math.max(2, (val / 255) * (canvas.height - 4));
+          canvasCtx.fillStyle = `hsl(${165 + i * 3}, 100%, 50%)`;
+          canvasCtx.fillRect(i * barWidth, canvas.height - barHeight, barWidth - 2, barHeight);
+        }
+      }
+
+      if (animFrameId) cancelAnimationFrame(animFrameId);
+      draw();
+    }
+
+    // Toggle Recording
+    async function toggleRecording() {
+      if (isRecording) {
+        stopRecording();
+      } else {
+        await startRecording();
+      }
+    }
+
+    async function startRecording() {
+      try {
+        btnRecordToggle.disabled = true;
+        recordText.textContent = "Connecting Mic...";
+        recordIcon.textContent = "⏳";
+
+        const stream = await getOrInitMicStream();
+        if (audioContext && audioContext.state === "suspended") {
+          await audioContext.resume();
+        }
+
+        audioChunks = [];
+        const options = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
+          ? { mimeType: "audio/webm;codecs=opus" }
+          : { mimeType: "audio/webm" };
+
+        mediaRecorder = new MediaRecorder(stream, options);
+
+        mediaRecorder.ondataavailable = e => {
+          if (e.data && e.data.size > 0) audioChunks.push(e.data);
+        };
+
+        mediaRecorder.onstop = () => {
+          processAndSendRecording();
+        };
+
+        // Collect chunks every 100ms
+        mediaRecorder.start(100);
+        isRecording = true;
+        recordingStartTime = performance.now();
+
+        // UI state
+        btnRecordToggle.disabled = false;
+        btnRecordToggle.classList.add("is-recording");
+        recordIcon.textContent = "⏹️";
+        recordText.textContent = "Stop & Send";
+
+        micStatusBadge.className = "mic-status-badge recording";
+        micStatusBadge.textContent = "● Recording";
+
+        // Timer
+        if (timerInterval) clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+          const elapsedSec = Math.floor((performance.now() - recordingStartTime) / 1000);
+          const mins = String(Math.floor(elapsedSec / 60)).padStart(2, '0');
+          const secs = String(elapsedSec % 60).padStart(2, '0');
+          recordingTimer.textContent = `${mins}:${secs}`;
+        }, 200);
+
+      } catch (err) {
+        btnRecordToggle.disabled = false;
+        recordIcon.textContent = "🎙️";
+        recordText.textContent = "Start Recording";
+        alert("Microphone Error: " + err.message + "\nPlease grant microphone permission in your browser.");
+      }
+    }
+
+    function stopRecording() {
+      if (!mediaRecorder || !isRecording) return;
+
+      isRecording = false;
+      if (timerInterval) clearInterval(timerInterval);
+
+      btnRecordToggle.classList.remove("is-recording");
+      btnRecordToggle.disabled = true;
+      recordIcon.textContent = "⏳";
+      recordText.textContent = "Transcribing Speech...";
+      recordingTimer.textContent = "00:00";
+
+      micStatusBadge.className = "mic-status-badge active";
+      micStatusBadge.textContent = "● Transcribing";
+
+      const durationMs = performance.now() - recordingStartTime;
+      mediaRecorder.stop();
+    }
+
+    // Process & Send Audio Turn
+    async function processAndSendRecording() {
+      const durationMs = performance.now() - recordingStartTime;
+
+      if (audioChunks.length === 0 || durationMs < 500) {
+        alert("Recording was too short (less than 1 second). Please speak a full sentence.");
+        btnRecordToggle.disabled = false;
+        recordIcon.textContent = "🎙️";
+        recordText.textContent = "Start Recording";
+        return;
+      }
+
+      const audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType || "audio/webm" });
+
+      const tempMsgRow = appendMessage("user", "🎤 [Audio message sent...]", "Transcribing with faster-whisper...");
+
+      const formData = new FormData();
+      formData.append("session_id", currentSessionId);
+      formData.append("file", audioBlob, "speech.webm");
+      formData.append("voice", voiceSelect.value);
+
+      try {
+        const res = await fetch("/chat/voice", {
+          method: "POST",
+          body: formData
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.detail || "Server error");
+        }
+
+        const data = await res.json();
+
+        // Update user message bubble with actual transcript
+        const bubble = tempMsgRow.querySelector(".message-bubble");
+        if (bubble) bubble.textContent = data.user_transcript;
+
+        // Add assistant reply
+        appendMessage("assistant", data.reply_text, `${data.total_latency_ms}ms total`);
+
+        // Telemetry
+        sttLatencyEl.textContent = data.stt_latency_ms + "ms";
+        llmLatencyEl.textContent = data.llm_latency_ms + "ms";
+        ttsLatencyEl.textContent = data.tts_latency_ms + "ms";
+        totalLatencyEl.textContent = data.total_latency_ms + "ms";
+
+        // Play audio & synchronize visemes
+        if (data.audio_base64 || data.audio_url) {
+          ttsAudio.src = data.audio_base64 || data.audio_url;
+          audioContainer.style.display = "block";
+          btnReplay.disabled = false;
+          ttsAudio.play();
+          playVisemesTimeline(data.visemes);
+        }
+      } catch (err) {
+        appendMessage("assistant", "⚠️ Error processing speech: " + err.message);
+      } finally {
+        btnRecordToggle.disabled = false;
+        recordIcon.textContent = "🎙️";
+        recordText.textContent = "Start Recording";
+        micStatusBadge.className = "mic-status-badge active";
+        micStatusBadge.textContent = "● Listening";
+      }
+    }
+
+    // Send Text Turn
+    async function sendTextTurn() {
+      const text = messageInput.value.trim();
+      if (!text) return;
+
+      messageInput.value = "";
+      appendMessage("user", text);
+      btnSend.disabled = true;
+
+      try {
+        const res = await fetch("/chat/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            session_id: currentSessionId,
+            message: text,
+            synthesize_voice: true,
+            voice: voiceSelect.value
+          })
+        });
+
+        const data = await res.json();
+        appendMessage("assistant", data.reply, `${data.total_latency_ms}ms total`);
+
+        sttLatencyEl.textContent = "0ms (Text)";
+        llmLatencyEl.textContent = data.llm_latency_ms + "ms";
+        ttsLatencyEl.textContent = (data.tts_latency_ms || 0) + "ms";
+        totalLatencyEl.textContent = (data.total_latency_ms || 0) + "ms";
+
+        if (data.audio_base64 || data.audio_url) {
+          ttsAudio.src = data.audio_base64 || data.audio_url;
+          audioContainer.style.display = "block";
+          btnReplay.disabled = false;
+          ttsAudio.play();
+          playVisemesTimeline(data.visemes);
+        }
+      } catch (err) {
+        appendMessage("assistant", "⚠️ Error: " + err.message);
+      } finally {
+        btnSend.disabled = false;
+      }
+    }
+
+    // Spacebar Push-To-Talk
+    let spaceKeyDown = false;
+    window.addEventListener("keydown", (e) => {
+      if (e.code === "Space" && e.target !== messageInput && !spaceKeyDown) {
+        spaceKeyDown = true;
+        e.preventDefault();
+        if (!isRecording) startRecording();
+      }
+    });
+
+    window.addEventListener("keyup", (e) => {
+      if (e.code === "Space" && spaceKeyDown) {
+        spaceKeyDown = false;
+        e.preventDefault();
+        if (isRecording) stopRecording();
+      }
+    });
+
+    // Event listeners
+    btnRecordToggle.addEventListener("click", toggleRecording);
+
+    btnTestMic.addEventListener("click", async () => {
+      try {
+        btnTestMic.disabled = true;
+        await getOrInitMicStream();
+        testMicLabel.textContent = "Mic Live";
+      } catch (err) {
+        alert("Microphone Error: " + err.message + "\nPlease grant microphone access in your browser.");
+      } finally {
+        btnTestMic.disabled = false;
+      }
+    });
+
+    micSelect.addEventListener("change", async () => {
+      const devId = micSelect.value;
+      if (devId) {
+        try {
+          await getOrInitMicStream(devId);
+        } catch (err) {
+          alert("Error switching microphone: " + err.message);
+        }
+      }
+    });
+
+    // Auto-discover audio devices if permissions already granted
+    if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
+      populateMicrophoneList();
+      navigator.mediaDevices.ondevicechange = () => {
+        populateMicrophoneList();
+      };
+    }
+
+    const btnSampleTest = document.getElementById("btn-sample-test");
+    if (btnSampleTest) {
+      btnSampleTest.addEventListener("click", async () => {
+        btnSampleTest.disabled = true;
+        appendMessage("user", "🎵 [Sent sample audio: 'What services and AI solutions does Modi Innovations provide?']", "Processing...");
+
+        try {
+          const sampleRes = await fetch("/static/audio/sample_question.mp3");
+          const blob = await sampleRes.blob();
+          const formData = new FormData();
+          formData.append("session_id", currentSessionId);
+          formData.append("file", blob, "sample_question.mp3");
+          formData.append("voice", voiceSelect.value);
+
+          const res = await fetch("/chat/voice", { method: "POST", body: formData });
+          if (!res.ok) throw new Error("Server error");
+          const data = await res.json();
+
+          appendMessage("assistant", data.reply_text, `${data.total_latency_ms}ms total`);
+          sttLatencyEl.textContent = data.stt_latency_ms + "ms";
+          llmLatencyEl.textContent = data.llm_latency_ms + "ms";
+          ttsLatencyEl.textContent = data.tts_latency_ms + "ms";
+          totalLatencyEl.textContent = data.total_latency_ms + "ms";
+
+          if (data.audio_base64 || data.audio_url) {
+            ttsAudio.src = data.audio_base64 || data.audio_url;
+            audioContainer.style.display = "block";
+            btnReplay.disabled = false;
+            ttsAudio.play();
+            playVisemesTimeline(data.visemes);
+          }
+        } catch (err) {
+          appendMessage("assistant", "⚠️ Sample test error: " + err.message);
+        } finally {
+          btnSampleTest.disabled = false;
+        }
+      });
+    }
+
+    btnSend.addEventListener("click", sendTextTurn);
+    messageInput.addEventListener("keydown", e => {
+      if (e.key === "Enter") sendTextTurn();
+    });
+
+    btnReplay.addEventListener("click", () => {
+      if (ttsAudio.src) {
+        ttsAudio.currentTime = 0;
+        ttsAudio.play();
+      }
+    });
+
+    btnNewSession.addEventListener("click", () => {
+      initSession();
+      chatBox.innerHTML = `
+        <div class="message-row assistant">
+          <div class="message-bubble">New session started! What would you like to talk about?</div>
+          <span class="message-meta">Avatar • New Session</span>
+        </div>
+      `;
+    });
+
+    // Start
+    initSession();
+  </script>
+</body>
+</html>
